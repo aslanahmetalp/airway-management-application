@@ -1,52 +1,247 @@
-# Prerequisites
-*.d
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+// Yolcu bilgilerini tutan yapi (Node)
+struct FlightNode {
+    char passengerName[50];
+    char destination[50];
+    struct FlightNode* next;
+};
 
-# Linker output
-*.ilk
-*.map
-*.exp
+// Baðli liste baslangic noktasi
+struct FlightNode* head = NULL;
 
-# Precompiled Headers
-*.gch
-*.pch
+// Temizleme komutunu belirleme
+#ifdef _WIN32
+#define CLEAR_SCREEN "cls"
+#else
+#define CLEAR_SCREEN "clear"
+#endif
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+// 1.Yeni bir ucus bilgisi ekleyen fonksiyon
+void addFlight() {
+    char name[50], destination[50];
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+    // Ekranı temizle
+    system(CLEAR_SCREEN);
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+    printf("Yolcunun ismini giriniz: ");
+    scanf("%s", name);
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+    printf("%s'in gidecegi sehri giriniz: ", name);
+    scanf("%s", destination);
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+    // Yeni bir dugum olustur
+    struct FlightNode* newFlight = (struct FlightNode*)malloc(sizeof(struct FlightNode));
+    strcpy(newFlight->passengerName, name);
+    strcpy(newFlight->destination, destination);
+    newFlight->next = NULL;
+
+    // Eger liste bossa, yeni dugumu basa ekle
+    if (head == NULL) {
+        head = newFlight;
+    } else {
+        // Eger liste doluysa, listenin sonuna ekle
+        struct FlightNode* current = head;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = newFlight;
+    }
+
+    printf("Yeni ucus eklendi: Yolcu Ismi: %s , Rota: Istanbul --> %s\n", name, destination);
+}
+
+// 2. Tum ucuslari listeleme fonksiyonu
+void listAllFlights() {
+    int count = 0;
+    struct FlightNode* current = head;
+
+    // Ekranı temizle
+    system(CLEAR_SCREEN);
+
+    printf("Su andaki tum ucus seferleri:\n");
+
+    while (current != NULL) {
+        count++;
+        printf("%d-%s --> %s\n", count, current->passengerName, current->destination);
+        current = current->next;
+    }
+
+    if (count == 0) {
+        printf("Ucus bulunmamaktadir.\n");
+    }
+}
+
+// 3. Tum yolcu isimlerini listeleme fonksiyonu
+void listAllPassengers() {
+    int count = 0;
+    struct FlightNode* current = head;
+
+    // Ekranı temizle
+    system(CLEAR_SCREEN);
+
+    printf("Su andaki tum yolcularin listesi:\n");
+
+    while (current != NULL) {
+        count++;
+        printf("%d-%s\n", count, current->passengerName);
+        current = current->next;
+    }
+
+    if (count == 0) {
+        printf("Yolcu bulunmamaktadir.\n");
+    }
+}
+
+// 4. Gidilecek tüm sehirleri listeleme fonksiyonu
+void listAllDestinations() {
+    int count = 0;
+    struct FlightNode* current = head;
+
+    // Ekranı temizle
+    system(CLEAR_SCREEN);
+
+    printf("Gidilecek sehirlerin listesi:\n");
+
+    while (current != NULL) {
+        count++;
+        printf("%d-%s\n", count, current->destination);
+        current = current->next;
+    }
+
+    if (count == 0) {
+        printf("Sehir bulunmamaktadir.\n");
+    }
+}
+
+// 5. Toplam ucus sayisini listeleme fonksiyonu
+void totalFlights() {
+    int count = 0;
+    struct FlightNode* current = head;
+
+    // Ekranı temizle
+    system(CLEAR_SCREEN);
+
+    while (current != NULL) {
+        count++;
+        current = current->next;
+    }
+
+    printf("Su andaki toplam ucus sayisi: %d\n", count);
+}
+
+// 6. Ucus silme fonksiyonu
+void deleteFlight() {
+    int count = 0;
+    struct FlightNode* current = head;
+    struct FlightNode* previous = NULL;
+
+    // Ekranı temizle
+    system(CLEAR_SCREEN);
+
+    printf("Silmek istediginiz ucuyu seciniz:\n");
+
+    while (current != NULL) {
+        count++;
+        printf("%d-%s --> %s\n", count, current->passengerName, current->destination);
+        current = current->next;
+    }
+
+    if (count == 0) {
+        printf("Silinecek ucus bulunmamaktadir.\n");
+        return;
+    }
+
+    int choice;
+    printf("Seciminizi yapiniz: ");
+    scanf("%d", &choice);
+
+    if (choice < 1 || choice > count) {
+        printf("Hatali secim. Lutfen gecerli bir ucus numarasi giriniz.\n");
+        return;
+    }
+
+    current = head;
+    for (int i = 1; i < choice; i++) {
+        previous = current;
+        current = current->next;
+    }
+
+    if (previous == NULL) {
+        head = current->next;
+    } else {
+        previous->next = current->next;
+    }
+
+    free(current);
+    printf("Ucus basariyla silindi.\n");
+}
+
+int main() {
+    int choice;
+    int scanfResult;  // scanf'in dönüş değerini saklamak için değişken
+
+    do {
+        printf("\nYapmak istediginiz islemi seciniz:\n");
+        printf("1-Yeni ucus ekleme\n");
+        printf("2-Tum ucuslari listeleme\n");
+        printf("3-Tum yolcu isimlerini listeleme\n");
+        printf("4-Gidilecek tum sehirleri listeleme\n");
+        printf("5-Su andaki toplam ucus sayisi\n");
+        printf("6-Ucus silme\n");
+        printf("7-Cikis\n");
+
+        printf("Seciminizi yapiniz: ");
+
+        // Kullanıcının girişini kontrol et
+        scanfResult = scanf("%d", &choice);
+
+        // Geçersiz giriş durumunda hata mesajı yazdır
+        if (scanfResult != 1) {
+            printf("Hatali giris. Lutfen gecerli bir sayi giriniz.\n");
+
+            // Ekranı temizle
+            system(CLEAR_SCREEN);
+
+            // Bufferı temizle
+            while (getchar() != '\n');
+
+            // Doğru giriş yapılıncaya kadar dönmeyi sağla
+            continue;
+        }
+
+        switch (choice) {
+            case 1:
+                addFlight();
+                break;
+            case 2:
+                listAllFlights();
+                break;
+            case 3:
+                listAllPassengers();
+                break;
+            case 4:
+                listAllDestinations();
+                break;
+            case 5:
+                totalFlights();
+                break;
+            case 6:
+                deleteFlight();
+                break;
+            case 7:
+                printf("Programdan cikiliyor...\n");
+                break;
+            default:
+                printf("Gecersiz secim. Lutfen tekrar deneyin.\n");
+
+                // Ekranı temizle
+            system(CLEAR_SCREEN);
+
+        }
+    } while (choice != 7);
+
+    return 0;
+}
